@@ -5,7 +5,6 @@ import re
 import requests
 import xml.etree.ElementTree as ET
 
-# Repository configuration
 GITHUB_USER = "unsparkables"
 REPO_NAME = "daily-reddit-pics"
 
@@ -20,7 +19,6 @@ IMAGES_DIR = "images"
 
 os.makedirs(IMAGES_DIR, exist_ok=True)
 
-# Atom namespace used by Reddit RSS
 ATOM_NS = {"atom": "http://www.w3.org/2005/Atom"}
 
 def fetch_top_post_from_rss(subreddit):
@@ -41,13 +39,13 @@ def fetch_top_post_from_rss(subreddit):
             author = entry.find("atom:author/atom:name", ATOM_NS).text or "unknown"
             content = entry.find("atom:content", ATOM_NS).text or ""
             
-            # Extract high-res image link from reddit content HTML
             unescaped_content = html.unescape(content)
             
-            # Find direct i.redd.it links or standard image extensions
-            img_matches = re.findall(r'href=[\'"](https://(?:i\.redd\.it|preview\.redd\.it)/[^\'"]+)[\'"]', unescaped_content)
+            img_matches = re.findall(r'href=[\'"](https://i\.redd\.it/[^\'"\s]+)[\'"]', unescaped_content)
             if not img_matches:
-                img_matches = re.findall(r'src=[\'"](https://[^\'"]+\.(?:jpg|jpeg|png|webp))[\'"]', unescaped_content)
+                img_matches = re.findall(r'(https://preview\.redd\.it/[^\'"\s<>]+)', unescaped_content)
+            if not img_matches:
+                img_matches = re.findall(r'src=[\'"](https://[^\'"\s]+\.(?:jpg|jpeg|png|webp)[^\'"\s]*)[\'"]', unescaped_content)
                 
             if img_matches:
                 img_url = img_matches[0].replace("&amp;", "&")
